@@ -1,0 +1,4 @@
+# Verify that strictMath=true prevents LESS from evaluating math expressions
+
+> assets
+> checkStrictMath

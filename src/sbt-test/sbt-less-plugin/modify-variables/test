@@ -1,0 +1,4 @@
+# Verify that modifyVariables overrides the value of a variable defined in the LESS source
+
+> assets
+> checkVariableModified
