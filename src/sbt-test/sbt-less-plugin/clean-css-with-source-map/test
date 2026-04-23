@@ -1,0 +1,5 @@
+# Verify that enabling both cleancss and sourceMap produces a valid merged source map
+# that reflects positions in the minified CSS (not the pre-minified CSS).
+
+> assets
+> checkMinifiedSourceMap

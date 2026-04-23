@@ -42,6 +42,56 @@
         if (e) throw e;
     }
 
+    // Build the clean-css post-processor plugin once, outside the per-file loop. The
+    // options are identical for every source file (parsed from the same jsOptions JSON),
+    // and the plugin object holds no per-file state — it only closes over cleanCssOpts.
+    var baseOptions = JSON.parse(optionsString);
+    var cleanCssPlugin = null;
+    if (baseOptions.cleancss) {
+        var CleanCSS = requireIfExists("clean-css/5.3.3", "clean-css"); // sync with build.sbt
+        var cleanCssOpts = baseOptions.cleancssOptions || {};
+        cleanCssPlugin = {
+            install: function (less, pluginManager) {
+                pluginManager.addPostProcessor({
+                    process: function (css, extra) {
+                        var ccOpts = Object.assign({}, cleanCssOpts);
+                        var originalMap = null;
+                        if (extra.sourceMap) {
+                            var externalMap = extra.sourceMap.getExternalSourceMap();
+                            if (externalMap) {
+                                var externalMapStr = externalMap.toString();
+                                originalMap = JSON.parse(externalMapStr);
+                                ccOpts.sourceMap = externalMapStr;
+                            }
+                        }
+                        var ccResult = new CleanCSS(ccOpts).minify(css);
+                        // clean-css uses `errors` for both fatal and non-fatal issues (e.g.
+                        // missing @import targets are reported here but clean-css still
+                        // produces valid styles). Only fail when no styles were produced.
+                        if (ccResult.styles === undefined) {
+                            throw new Error("clean-css produced no output" +
+                                (ccResult.errors && ccResult.errors.length
+                                    ? ": " + ccResult.errors.join("; ")
+                                    : ""));
+                        }
+                        if (extra.sourceMap && ccResult.sourceMap) {
+                            // clean-css names the anonymous input "$stdin" in the merged map; restore
+                            // the original `sources` and `sourcesContent` from less.js's map so the
+                            // final .css.map references the actual .less file(s).
+                            var mergedMap = JSON.parse(String(ccResult.sourceMap));
+                            if (originalMap) {
+                                if (originalMap.sources) mergedMap.sources = originalMap.sources;
+                                if (originalMap.sourcesContent) mergedMap.sourcesContent = originalMap.sourcesContent;
+                            }
+                            extra.sourceMap.setExternalSourceMap(JSON.stringify(mergedMap));
+                        }
+                        return ccResult.styles + (extra.sourceMap ? extra.sourceMap.getCSSAppendage() : "");
+                    }
+                });
+            }
+        };
+    }
+
     sourceFileMappings.forEach(function (sourceFileMapping) {
 
         // Reparse options each time so we get a different object that can be modified
@@ -52,23 +102,23 @@
         var output = path.join(target, outputFile);
         var sourceMapOutput = output + ".map";
 
+        // sourceMapFileInline makes less.js embed the map inline — skip the external .map file in that case.
+        var writeExternalSourceMap = (options.sourceMap == true) && !options.sourceMapFileInline;
+
         options.sourceMap = options.sourceMap == true ? {
             sourceMapBasepath: path.dirname(input),
             sourceMapFullFilename: path.basename(sourceMapOutput),
-            sourceMapOutputFilename: path.basename(outputFile)
+            sourceMapOutputFilename: path.basename(outputFile),
+            sourceMapFileInline: options.sourceMapFileInline || false,
+            outputSourceFiles: options.sourceMapLessInline || false,
+            sourceMapRootpath: options.sourceMapRootpath || ""
         } : null;
         options.filename = input;
 
-        if (options.cleancss) {
-            var LessPluginCleanCSS = requireIfExists("less-plugin-clean-css/1.5.1", "less-plugin-clean-css"); // sync with build.sbt
-            var cleanCSSPlugin = new LessPluginCleanCSS();
-            options.plugins = [cleanCSSPlugin];
-        } else {
-            options.plugins = [];
-        }
+        options.plugins = cleanCssPlugin ? [cleanCssPlugin] : [];
 
         var writeSourceMap = function (content, onDone) {
-            if (content) { // NOTE: this is workaround for https://github.com/less/less.js/issues/2430
+            if (content && writeExternalSourceMap) { // NOTE: content check is a workaround for https://github.com/less/less.js/issues/2430
                 if (options.relativeImports) {
                     // replace leading part in included assets with "../"
                     content = JSON.parse(content);
@@ -118,7 +168,7 @@
                         source: input,
                         result: {
                             filesRead: [input].concat(imports),
-                            filesWritten: options.sourceMap ? [output, sourceMapOutput] : [output]
+                            filesWritten: writeExternalSourceMap ? [output, sourceMapOutput] : [output]
                         }
                     });
 

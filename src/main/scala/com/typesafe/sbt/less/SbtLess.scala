@@ -13,7 +13,7 @@ object Import {
     val less = TaskKey[Seq[File]]("less", "Invoke the less compiler.")
 
     val cleancss = SettingKey[Boolean]("less-cleancss", "Compress output using clean-css.")
-    val cleancssOptions = SettingKey[String]("less-cleancss-options", "Pass an option to clean css, using CLI arguments from https://github.com/GoalSmashers/clean-css .")
+    val cleancssOptions = SettingKey[Map[String, JsValue]]("less-cleancss-options", "Options passed verbatim to clean-css. See https://github.com/clean-css/clean-css#constructor-options for the full list.")
     val color = SettingKey[Boolean]("less-color", "Whether LESS output should be colorised")
     val compress = SettingKey[Boolean]("less-compress", "Compress output by removing some whitespaces.")
     val globalVariables = SettingKey[Seq[(String, String)]]("less-global-variables", "Variables that will be placed at the top of the less file.")
@@ -58,7 +58,7 @@ object SbtLess extends AutoPlugin {
 
     jsOptions := JsObject(
       "cleancss" -> JsBoolean(cleancss.value),
-      "cleancssOptions" -> JsString(cleancssOptions.value),
+      "cleancssOptions" -> JsObject(cleancssOptions.value),
       "color" -> JsBoolean(color.value),
       "compress" -> JsBoolean(compress.value),
       "globalVars" -> toJsObjectOrNull(globalVariables.value),
@@ -104,7 +104,7 @@ object SbtLess extends AutoPlugin {
 
   override def projectSettings = Seq(
     cleancss := false,
-    cleancssOptions := "",
+    cleancssOptions := Map.empty[String, JsValue],
     color := false,
     compress := false,
     globalVariables := Seq.empty,

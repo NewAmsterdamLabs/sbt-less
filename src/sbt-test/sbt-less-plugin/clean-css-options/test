@@ -1,0 +1,4 @@
+# Verify that cleancssOptions are actually passed through to clean-css
+
+> assets
+> checkCleancssOptionsApplied

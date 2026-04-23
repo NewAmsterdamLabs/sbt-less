@@ -1,0 +1,4 @@
+# Verify that sourceMapFileInline embeds the source map as a data-URI in the CSS output
+
+> assets
+> checkSourceMapInlined

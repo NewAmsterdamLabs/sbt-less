@@ -1,0 +1,4 @@
+# Verify that sourceMapRootpath is prepended to source paths in the .css.map file
+
+> assets
+> checkSourceMapRootpath

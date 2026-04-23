@@ -1,0 +1,5 @@
+# Verify that sourceMapLessInline's sourcesContent survives clean-css minification
+# (clean-css's SMG would drop it if we didn't explicitly restore it from less.js's input map)
+
+> assets
+> checkLessSourcePreservedThroughCleancss

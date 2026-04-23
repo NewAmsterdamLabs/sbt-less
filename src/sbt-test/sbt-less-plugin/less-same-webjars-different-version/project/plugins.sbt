@@ -23,7 +23,4 @@ libraryDependencies ++= Seq(
   // and so on...
   "org.webjars.npm" % "es6-promise" % "4.1.0",
   "org.webjars" % "es6-promise" % "2.1.1",
-
-  ("org.webjars.npm" % "less-plugin-clean-css" % "1.6.0").intransitive(),
-  // TODO: there was no other webjars type for less-plugin-clean-css currently
 )

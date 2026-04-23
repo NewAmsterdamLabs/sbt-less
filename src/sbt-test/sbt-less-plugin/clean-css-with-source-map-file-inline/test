@@ -1,0 +1,5 @@
+# Verify cleancss + sourceMap + sourceMapFileInline produces a valid single inline map
+# (this is the exact configuration web-admin uses)
+
+> assets
+> checkInlineSourceMapWithCleancss

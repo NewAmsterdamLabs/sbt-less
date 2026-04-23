@@ -1,0 +1,4 @@
+# Verify that sourceMapLessInline embeds the LESS source into the .css.map file
+
+> assets
+> checkLessSourceEmbedded

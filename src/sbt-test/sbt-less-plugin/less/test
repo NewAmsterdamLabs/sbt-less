@@ -25,6 +25,6 @@ $ exists project/target/node-modules/webjars/less/index.cjs
 
 $ exists project/target/node-modules/webjars/mkdirp/index.js
 
-$ exists project/target/node-modules/webjars/less-plugin-clean-css/package.json
+$ exists project/target/node-modules/webjars/clean-css/lib/clean.js
 
 $ exists project/target/node-modules/webjars/es6-promise/dist/es6-promise.js

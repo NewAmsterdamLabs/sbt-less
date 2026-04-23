@@ -1,0 +1,4 @@
+# Verify that @import url() statements are preserved through clean-css
+
+> assets
+> checkImportPreserved
