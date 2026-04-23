@@ -30,7 +30,7 @@ object Import {
     val sourceMapFileInline = SettingKey[Boolean]("less-source-map-file-inline", "Whether the source map should be embedded in the output file")
     val sourceMapLessInline = SettingKey[Boolean]("less-source-map-less-inline", "Whether to embed the less code in the source map")
     val sourceMapRootpath = SettingKey[String]("less-source-map-rootpath", "Adds this path onto the sourcemap filename and less file paths.")
-    val strictImports = SettingKey[Boolean]("less-scrict-imports", "Whether imports should be strict.")
+    val strictImports = SettingKey[Boolean]("less-strict-imports", "Whether imports should be strict.")
     val strictMath = SettingKey[Boolean]("less-strict-math", "Requires brackets. This option may default to true and be removed in future.")
     val strictUnits = SettingKey[Boolean]("less-strict-units", "Whether all unit should be strict, or if mixed units are allowed.")
     val urlArgs = SettingKey[String]("less-url-args", "Adds params into url tokens (e.g. 42, cb=42 or 'a=1&b=2').")
