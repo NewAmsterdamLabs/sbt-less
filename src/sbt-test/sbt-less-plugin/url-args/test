@@ -1,0 +1,4 @@
+# Verify that urlArgs appends a query string to url() tokens in the output
+
+> assets
+> checkUrlArgsApplied

@@ -85,6 +85,7 @@ object SbtLess extends AutoPlugin {
       "strictImports" -> JsBoolean(strictImports.value),
       "strictMath" -> JsBoolean(strictMath.value),
       "strictUnits" -> JsBoolean(strictUnits.value),
+      "urlArgs" -> JsString(urlArgs.value),
       "verbose" -> JsBoolean(verbose.value)
     ).compactPrint
   )
@@ -123,6 +124,7 @@ object SbtLess extends AutoPlugin {
     strictImports := false,
     strictMath := false,
     strictUnits := false,
+    urlArgs := "",
     verbose := false
 
   ) ++ Project.inTask(less)(
