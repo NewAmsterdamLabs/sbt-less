@@ -11,8 +11,18 @@ developers += Developer(
   url("https://github.com/playframework")
 )
 
-addSbtJsEngine("1.4.0-M4")
-addSbtWeb("1.6.0-M4")
+// sbt-web and sbt-js-engine are version-pinned per cross-build variant. The sbt 2.x variants
+// were only published starting with 1.6.0-M1 / 1.4.0-M1. The sbt 1.x line stays on the latest
+// 1.5.x stable so that older sbt-web pipeline plugins (such as sbt-uglify, sbt-rjs, sbt-jshint)
+// that haven't been updated to the new SbtWeb.syncMappings signature continue to resolve.
+def crossSbtPlugin(name: String, sbt1Version: String, sbt2Version: String) =
+  libraryDependencies += Defaults.sbtPluginExtra(
+    "com.github.sbt" % name % (if (scalaBinaryVersion.value == "3") sbt2Version else sbt1Version),
+    (pluginCrossBuild / sbtBinaryVersion).value,
+    scalaBinaryVersion.value
+  )
+crossSbtPlugin("sbt-web",       sbt1Version = "1.5.8", sbt2Version = "1.6.0-M4")
+crossSbtPlugin("sbt-js-engine", sbt1Version = "1.3.9", sbt2Version = "1.4.0-M4")
 
 pluginCrossBuild / sbtVersion := {
   scalaBinaryVersion.value match {
