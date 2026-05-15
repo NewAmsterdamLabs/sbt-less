@@ -73,3 +73,55 @@ Assets / LessKeys.less / includeFilter := "*.less"
 
 Assets / LessKeys.less / excludeFilter := "_*.less"
 ```
+
+## Publishing (Zola fork)
+
+This fork publishes to Zola's Nexus instead of Sonatype Central. The
+publish destination, `organization`, and `publishMavenStyle` settings
+live in `publishZola.sbt` at the project root.
+
+For the symlink to resolve, the `tools` repo must be cloned as a
+sibling of this one (i.e. both at the same parent directory).
+
+### Versioning
+
+The version is derived by `sbt-dynver` from git, with
+`dynverVTagPrefix := false` so tags do not need a `v` prefix:
+
+- **Clean tree, HEAD on a tag** → `version` is the tag verbatim, e.g.
+  `2.1.0-ZOLA`. `isSnapshot` is `false`, so artifacts go to the Nexus
+  releases repo.
+- **Past the tag or dirty tree** → version becomes
+  `<tag>+<n>-<sha>+<ts>-SNAPSHOT`. `isSnapshot` is `true`, so artifacts
+  go to the Nexus snapshots repo.
+
+To cut a Zola release, tag the commit (e.g. `git tag 2.1.0-ZOLA`) and
+ensure the working tree is clean before publishing.
+
+### Cross-publish command
+
+The plugin cross-builds two variants — Scala 2.12 / sbt 1.x and Scala
+3 / sbt 2.x. Use the `+` prefix to publish both, and set
+`ZOLA_PUBLISH=1` so `publishZola.sbt` switches `organization` from
+upstream's `com.github.sbt` to `com.zola.sbt`:
+
+```
+ZOLA_PUBLISH=1 sbt "+clean" "+publish"
+```
+
+(Without the env var, `organization` stays at `com.github.sbt` so
+`sbt scripted` continues to resolve the locally-published plugin
+correctly.)
+
+This produces:
+
+| Scala   | sbt API    | Coordinate suffix |
+| ------- | ---------- | ----------------- |
+| 2.12.x  | 1.x        | `_2.12_1.0`       |
+| 3.x     | 2.0.0-RC11 | `_3_2.0`          |
+
+Coordinates: `com.zola.sbt:sbt-less_<scala>_<sbt>:<version>`.
+
+> **Do not run `sbt ci-release`.** That task is wired for Sonatype
+> Central (GPG signing, staging, close-and-promote) and is not
+> appropriate for the Zola Nexus flow.
